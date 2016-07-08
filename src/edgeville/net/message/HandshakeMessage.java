@@ -1,0 +1,18 @@
+package edgeville.net.message;
+
+/**
+ * @author Simon on 8/4/2014.
+ */
+public class HandshakeMessage {
+
+	private final int revision;
+
+	public HandshakeMessage(int revision) {
+		this.revision = revision;
+	}
+
+	public int revision() {
+		return revision;
+	}
+
+}

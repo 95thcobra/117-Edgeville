@@ -1,0 +1,233 @@
+{
+  "username": "g32ag23ga3g3a2g",
+  "displayName": "g32ag23ga3g3a2g",
+  "password": "a23ga23g",
+  "receivedStarter": false,
+  "tile": {
+    "x": 3094,
+    "z": 3503,
+    "level": 0
+  },
+  "privilege": "ADMIN",
+  "migration": 0,
+  "skullIcon": -1,
+  "prayerIcon": -1,
+  "debug": false,
+  "kills": 0,
+  "deaths": 0,
+  "inventory": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "equipment": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "loadout": {
+    "inventory": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "equipment": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "bank": [],
+  "varps": [
+    {
+      "id": 300,
+      "value": 1000
+    },
+    {
+      "id": 1050,
+      "value": 16
+    },
+    {
+      "id": 1055,
+      "value": 8192
+    },
+    {
+      "id": 1227,
+      "value": 130023424
+    }
+  ],
+  "skills": [
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 10,
+      "xp": 1154.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    },
+    {
+      "level": 1,
+      "xp": 0.0
+    }
+  ],
+  "quickprayers": [],
+  "autocastSpellChild": 0,
+  "lastCastedSpellChild": 0,
+  "autocasting": false
+}

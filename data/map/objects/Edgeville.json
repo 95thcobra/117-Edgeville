@@ -1,0 +1,16 @@
+[
+  //Edgeville object spawns
+  // rot = rotation
+  {
+    "id": 6817,
+    "x": 3093,
+    "z": 3506,
+	"rot":2
+  },
+  {
+    "id": 6552,
+    "x": 3096,
+    "z": 3506,
+    "rot":2
+  }
+]

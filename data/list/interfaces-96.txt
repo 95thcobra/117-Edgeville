@@ -1,0 +1,43 @@
+// 68 slayer partner
+// 76 minigames
+// 80 enchant crossbow bolts
+// 136 both heads npc
+// 140 select an option
+// 154 leather crafting
+// 155 barrows chest
+// 164 horizontal gameframe
+// 178 bounty hunter store
+// 212 room creation
+// 213 bank pin
+// 215 iron man setup
+// 267 void knight rewards
+// 269 appearanace
+// 303-306 3 options for what to make
+// 307 how many would you like to cook?
+// 309 how many would you like to make?
+// 311 smelting
+// 312
+// 324 hide tanning
+// 333-335 trading
+// 370 house options
+// 378 lobby
+// 383 grand exchange trade history
+// 394-397 furniture creation
+// 402 g.e collection box
+// 421 5 options
+// 426 slayer rewards
+// 446 necklaces/rings/etc
+// 451 item sets
+// 459 what would you like to spin?
+// 465 grand exchange
+// 518 follower inventory
+// 526 view other player stats
+// 60 advanced gfx options
+// 70 text list
+// 77 quick prayers
+// 84 equipment bonuses
+// 90 bounty hunter target
+// 100 tourdament supplies
+// 102 items kept on death
+// 106-110 duel arena
+// 121 keybindings
