@@ -60,6 +60,7 @@ public class DisplayMap implements Command { // Aka dipsleemap
 				buf.writeBits(18, player.getTile().toRegionPacked());
 			}
 		}
+		
 		buf.endBitMode();
 		player.initialized = true;
 	}

@@ -43,7 +43,7 @@ public class PlayerSyncTask implements Task {
 
 		private void sync(Player player) {
 			RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(512));
-			buffer.packet(79).writeSize(RSBuffer.SizeType.SHORT);
+			buffer.packet(64).writeSize(RSBuffer.SizeType.SHORT);
 
 			buffer.startBitMode();
 			encodeContextPlayer(player, buffer);
@@ -53,7 +53,8 @@ public class PlayerSyncTask implements Task {
 
 			// Update other masks
 			PlayerSyncInfo sync = (PlayerSyncInfo) player.sync();
-			for (int i=0; i < sync.playerUpdateReqPtr(); i++) {
+
+			for (int i = 0; i < sync.playerUpdateReqPtr(); i++) {
 				Player p = player.world().players().get(sync.playerUpdateRequests()[i]);
 
 				if (p == null) {
@@ -63,7 +64,8 @@ public class PlayerSyncTask implements Task {
 				}
 
 				PlayerSyncInfo pSync = (PlayerSyncInfo) p.sync();
-				int mask = pSync.calculatedFlag() | (sync.isNewlyAdded(p.index()) ? PlayerSyncInfo.Flag.LOOKS.value : 0);
+				int mask = pSync.calculatedFlag()
+						| (sync.isNewlyAdded(p.index()) ? PlayerSyncInfo.Flag.LOOKS.value : 0);
 				if (mask >> 8 != 0) {
 					mask |= 0x80;
 				}
@@ -71,7 +73,7 @@ public class PlayerSyncTask implements Task {
 				buffer.writeByte(mask);
 				if (mask >> 8 != 0)
 					buffer.writeByte(mask >> 8);
-				
+
 				if (pSync.hasFlag(PlayerSyncInfo.Flag.HIT.value))
 					buffer.get().writeBytes(pSync.hitSet());
 				if (pSync.hasFlag(PlayerSyncInfo.Flag.FACE_ENTITY.value))
@@ -80,7 +82,7 @@ public class PlayerSyncTask implements Task {
 					buffer.get().writeBytes(pSync.graphicSet());
 				if (pSync.hasFlag(PlayerSyncInfo.Flag.SHOUT.value))
 					buffer.get().writeBytes(pSync.shoutSet());
-				if (pSync.hasFlag(PlayerSyncInfo.Flag.LOOKS.value) || sync.isNewlyAdded(p.index()))//this
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.LOOKS.value) || sync.isNewlyAdded(p.index()))// this
 					buffer.get().writeBytes(pSync.looksBlock());
 				if (pSync.hasFlag(PlayerSyncInfo.Flag.FORCE_MOVE.value))
 					buffer.get().writeBytes(pSync.forceMoveSet());
@@ -149,15 +151,18 @@ public class PlayerSyncTask implements Task {
 		}
 
 		private void encodeSurroundings(Player player, RSBuffer buffer) {
-			buffer.writeBits(8, player.sync().localPlayerPtr()); // Local player count
+			buffer.writeBits(8, player.sync().localPlayerPtr()); // Local player
+																	// count
 
 			int rebuiltptr = 0;
-			for (int i=0; i<player.sync().localPlayerPtr(); i++) {
+			for (int i = 0; i < player.sync().localPlayerPtr(); i++) {
 				int index = player.sync().localPlayerIndices()[i];
 				Player p = player.world().players().get(index);
 
-				// See if the player either logged out, or is out of our viewport
-				if (p == null || player.getTile().distance(p.getTile()) > 14 || player.getTile().level != p.getTile().level) {
+				// See if the player either logged out, or is out of our
+				// viewport
+				if (p == null || player.getTile().distance(p.getTile()) > 14
+						|| player.getTile().level != p.getTile().level) {
 					buffer.writeBits(1, 1); // Yes, we need an update
 					buffer.writeBits(2, 3); // Type 3: remove
 					continue;
@@ -172,7 +177,9 @@ public class PlayerSyncTask implements Task {
 					int secondaryStep = p.sync().secondaryStep();
 
 					if (p.sync().teleported()) {
-						buffer.writeBits(2, 3); // Teleport (don't add to rebuilt, respawn after adding)
+						buffer.writeBits(2, 3); // Teleport (don't add to
+												// rebuilt, respawn after
+												// adding)
 					} else if (primaryStep >= 0) {
 						boolean run = secondaryStep >= 0;
 
@@ -208,11 +215,12 @@ public class PlayerSyncTask implements Task {
 
 		private void encodeMissing(Player player, RSBuffer buffer) {
 			int[] lp = player.sync().localPlayerIndices();
-			final int[] lpp = {player.sync().localPlayerPtr()};
+			final int[] lpp = { player.sync().localPlayerPtr() };
 
 			for (int idx = 0; idx < 2048; idx++) {
 				Player p = player.world().players().get(idx);
-				if (p == null || player.sync().hasInView(p.index()) || p == player || player.getTile().distance(p.getTile()) > 14 || p.getTile().level != player.getTile().level)
+				if (p == null || player.sync().hasInView(p.index()) || p == player
+						|| player.getTile().distance(p.getTile()) > 14 || p.getTile().level != player.getTile().level)
 					continue;
 
 				// Limit addition to 25 per cycle, and 255 local.
