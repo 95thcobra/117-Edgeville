@@ -33,12 +33,13 @@ public class InterfaceSettings implements Command {
 		player.message(settingStr);
 
 		RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(13));
-		buffer.packet(159);
+		buffer.packet(8);
 
-		buffer.writeLEShort(to);
+	
 		buffer.writeIntV1(hash);
 		buffer.writeLEInt(setting);
 		buffer.writeShort(from);
+		buffer.writeShortA(to);
 
 		return buffer;
 	}

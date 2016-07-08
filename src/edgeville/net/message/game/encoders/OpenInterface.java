@@ -24,11 +24,11 @@ public class OpenInterface implements Command {
 	public RSBuffer encode(Player player) {
 		RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(8));
 
-		buffer.packet(193);
+		buffer.packet(92);
 
-		buffer.writeLEShortA(id);
-		buffer.writeByteS(autoclose ? 1 : 0);
-		buffer.writeLEInt((target << 16) | targetChild);
+		buffer.writeInt((target << 16) | targetChild);
+		buffer.writeShort(id);
+		buffer.writeByteS(autoclose ? 1 : 0);//walkable
 
 		return buffer;
 	}

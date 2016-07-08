@@ -113,10 +113,10 @@ public class LoginService implements Service {
 		player.write(new DisplayMap(player)); // This has to be the first packet!		
 		
 		// incoming packet crash
-		player.write(new SetRootPane(548));
+		//player.write(new SetRootPane(548));
 		
 		//player.world().syncMap(player, null);
-		//player.interfaces().send(); // Must come after to set root pane; else crash =(
+		player.interfaces().send(); // Must come after to set root pane; else crash =(
 
 		// This isn't really a packet but it's required to be done on the logic thread
 		/*player.pendingActions().add(new Action() {

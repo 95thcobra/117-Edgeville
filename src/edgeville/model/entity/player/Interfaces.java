@@ -189,8 +189,8 @@ public class Interfaces {
 
 
 	public void send(int id, int target, int targetChild, boolean clickthrough) {
-		//player.write(new OpenInterface(id, target, targetChild, clickthrough));
-		//visible.put((target << 16) | targetChild, id);
+		player.write(new OpenInterface(id, target, targetChild, clickthrough));
+		visible.put((target << 16) | targetChild, id);
 	}
 
 	public void closeMain() {
