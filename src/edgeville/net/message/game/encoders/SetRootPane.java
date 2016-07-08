@@ -20,6 +20,7 @@ public class SetRootPane implements Command {
 
 		buffer.packet(32);
 		buffer.writeShortA(paneId);
+		System.out.println("sending root!" + paneId);
 
 		return buffer;
 	}

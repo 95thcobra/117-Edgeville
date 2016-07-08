@@ -10,6 +10,7 @@ import edgeville.net.ServerHandler;
 import edgeville.net.message.LoginRequestMessage;
 import edgeville.net.message.game.encoders.Action;
 import edgeville.net.message.game.encoders.DisplayMap;
+import edgeville.net.message.game.encoders.SetRootPane;
 import edgeville.services.Service;
 import edgeville.services.serializers.JSONFileSerializer;
 import edgeville.services.serializers.PlayerSerializer;
@@ -101,7 +102,7 @@ public class LoginService implements Service {
 	}
 
 	public static void complete(Player player, GameServer server, LoginRequestMessage message) {
-		player.interfaces().resizable(message.resizableInterfaces());
+		//player.interfaces().resizable(message.resizableInterfaces());
 		player.move(player.getTile());
 
 		// Attach player to session
@@ -111,8 +112,8 @@ public class LoginService implements Service {
 		System.out.println("Sending displaymap!");
 		player.write(new DisplayMap(player)); // This has to be the first packet!		
 		
-		
-		//player.interfaces().sendRoot(Interfaces.PANE_FIXED);
+		// incoming packet crash
+		player.write(new SetRootPane(548));
 		
 		//player.world().syncMap(player, null);
 		//player.interfaces().send(); // Must come after to set root pane; else crash =(

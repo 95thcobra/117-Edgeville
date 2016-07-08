@@ -80,8 +80,8 @@ public class ServerProcessor extends Thread {
 		tasks.add(new PlayerPreSyncTask());
 		tasks.add(new NpcPreSyncTask());
 		tasks.add(new NpcViewportTask());
-		tasks.add(new PlayerSyncTask());
-		tasks.add(new NpcSyncTask());
+		//tasks.add(new PlayerSyncTask());
+		//tasks.add(new NpcSyncTask());
 		tasks.add(new PlayerPostSyncTask());
 		tasks.add(new NpcPostSyncTask());
 

@@ -323,8 +323,8 @@ public class Player extends Entity {
 		this.sync = new PlayerSyncInfo(this);
 		this.skills = new Skills(this);
 		this.looks = new Looks(this);
-		this.interfaces = new Interfaces(this);
-		this.inventory = new ItemContainer(world, 28, ItemContainer.Type.REGULAR);
+		//this.interfaces = new Interfaces(this);
+		//this.inventory = new ItemContainer(world, 28, ItemContainer.Type.REGULAR);
 		this.equipment = new ItemContainer(world, 14, ItemContainer.Type.REGULAR);
 		// this.bank = new ItemContainer(world, 800,
 		// ItemContainer.Type.FULL_STACKING);
@@ -776,7 +776,7 @@ public class Player extends Entity {
 	@Override
 	public void cycle() {
 		super.cycle();
-
+/*
 		// Are we requested to be logged out?
 		if ((boolean) attribute(AttributeKey.LOGOUT, false)) {
 			putAttribute(AttributeKey.LOGOUT, false);
@@ -809,45 +809,24 @@ public class Player extends Entity {
 					skills.replenishStats();
 					timers.register(TimerKey.STAT_REPLENISH, 100);
 					break;
-				/*
-				 * case IN_COMBAT: interfaces().setBountyInterface(false);
-				 * break;
-				 */
 				}
 				// world.server().scriptRepository().triggerTimer(this, key);
 			}
 		}
 
 		interfaces.showSkull(!inSafeArea());
-		// Regenerate special energy
-		/*
-		 * if (!timers().has(TimerKey.SPECIAL_ENERGY_RECHARGE)) { int
-		 * currentEnergy = varps().getVarp(Varp.SPECIAL_ENERGY);
-		 * varps().setVarp(Varp.SPECIAL_ENERGY, Math.min(1000, currentEnergy +
-		 * 100)); timers.register(TimerKey.SPECIAL_ENERGY_RECHARGE, 50); }
-		 */
 
-		// If timer runs out and headicon is white skull then remove.
-		/*
-		 * if (!timers().has(TimerKey.SKULL) && getSkullHeadIcon() ==
-		 * Skulls.WHITE_SKUL.getSkullId()) { setSkullHeadIcon(-1); }
-		 */
-
-		// Players online in questtab
 		questTab.sendQuestTabTitle();
 
 		// Region enter and leave triggers
 		int lastregion = attribute(AttributeKey.LAST_REGION, -1);
 
-		// if (lastregion != tile.region()) {
-		// world.server().scriptRepository().triggerRegionEnter(this,
-		// tile.region());
-		// TODO OPTIONAL: Trigger region enter
-		// }
 		putAttribute(AttributeKey.LAST_REGION, tile.region());
 
 		// Show attack option when player is in wilderness.
 		handlePlayerOptions();
+		
+		*/
 	}
 
 	private void handlePlayerOptions() {
@@ -880,7 +859,7 @@ public class Player extends Entity {
 
 	public void precycle() {
 		// Sync inventory
-		if (inventory.dirty()) {
+		/*if (inventory.dirty()) {
 			write(new SetItems(93, 149, 0, inventory));
 			inventory.clean();
 		}
@@ -899,7 +878,7 @@ public class Player extends Entity {
 		if (bank.isDirty()) {
 			write(new SetItems(95, bank.getBankItems()));
 			bank.clean();
-		}
+		}*/
 	}
 
 	public boolean drainSpecialEnergy(int amount) {
