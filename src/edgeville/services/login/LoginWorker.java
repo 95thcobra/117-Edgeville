@@ -45,7 +45,7 @@ public class LoginWorker implements Runnable {
 				IsaacRand inrand = new IsaacRand(seed);
 				IsaacRand outrand = new IsaacRand(Arrays.stream(seed).map(i -> i + 50).toArray());
 
-				Tile startTile = new Tile(3094, 3503);
+				Tile startTile = new Tile(3222,3218);
 				Player player = new Player(message.channel(), message.username(), message.password(), service.server().world(), startTile, inrand, outrand);
 
 				boolean success = service.serializer().loadPlayer(player, null, message.password(), result -> {

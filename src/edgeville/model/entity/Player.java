@@ -323,7 +323,7 @@ public class Player extends Entity {
 		this.sync = new PlayerSyncInfo(this);
 		this.skills = new Skills(this);
 		this.looks = new Looks(this);
-		//this.interfaces = new Interfaces(this);
+		this.interfaces = new Interfaces(this);
 		//this.inventory = new ItemContainer(world, 28, ItemContainer.Type.REGULAR);
 		this.equipment = new ItemContainer(world, 14, ItemContainer.Type.REGULAR);
 		// this.bank = new ItemContainer(world, 800,

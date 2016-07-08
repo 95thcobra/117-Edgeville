@@ -71,21 +71,10 @@ public class DisplayMap implements Command { // Aka dipsleemap
 
 		initGPI(buf, player);
 
-		System.out.println("sending x: " + z);
+		System.out.println("sending x: " + x);
 		buf.writeLEShortA(x); // region x
 		System.out.println("sending z: " + z);
 		buf.writeShortA(z); // region y
-
-		// Calculate map keys needed
-		/*
-		 * List<int[]> keys = new LinkedList<>(); for (int rx = (x - (104 >> 4))
-		 * / 8; ((104 >> 4) + x) / 8 >= rx; rx++) { for (int rz = (z - (104 >>
-		 * 4)) / 8; ((104 >> 4) + z) / 8 >= rz; rz++) { int mapid = rz + (rx <<
-		 * 8); keys.add(MapDecryptionKeys.get(mapid)); } }
-		 * 
-		 * for (int[] keyset : keys) { for (int key : keyset) {
-		 * buf.writeIntV1(key); } }
-		 */
 
 		boolean forceSend = true;
 
@@ -101,6 +90,8 @@ public class DisplayMap implements Command { // Aka dipsleemap
 			for (int yCalc = (z - 6) / 8; yCalc <= ((z + 6) / 8); yCalc++) {
 				int region = (xCalc << 8) + yCalc;
 				System.out.println("region xteas:" + region);
+				
+				
 				int[] xtea = MapDecryptionKeys.get(region);
 				if (forceSend || ((yCalc != 49) && (yCalc != 149) && (yCalc != 147) && (xCalc != 50)
 						&& ((xCalc != 49) || (yCalc != 47)))) {

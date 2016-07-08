@@ -84,7 +84,7 @@ public class LoginHandler extends ChannelInboundHandlerAdapter {
 			IsaacRand inrand = new IsaacRand(seed);
 			IsaacRand outrand = new IsaacRand(Arrays.stream(seed).map(i -> i + 50).toArray());
 
-			Player player = new Player(message.channel(), message.username(), message.password(), server.world(), new Tile( 3093,3244), inrand, outrand);
+			Player player = new Player(message.channel(), message.username(), message.password(), server.world(), new Tile( 3222,3218), inrand, outrand);
 			player.id(player.getUsername());
 			LoginService.complete(player, server, message);
 		}

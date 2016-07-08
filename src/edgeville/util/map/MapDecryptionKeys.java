@@ -42,7 +42,7 @@ public class MapDecryptionKeys {
 		  File[] files = new File("data/map/xteas").listFiles();
 		   for (File file : files) {
 			   try(BufferedReader br = new BufferedReader(new FileReader(file))) {
-				   int[] xteas = new int[4];
+				   	int[] xteas = new int[4];
 				    for(int i = 0 ; i < xteas.length;i++) {
 				    	xteas[i] = Integer.parseInt(br.readLine());
 				    }
