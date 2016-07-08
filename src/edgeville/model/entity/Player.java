@@ -324,12 +324,10 @@ public class Player extends Entity {
 		this.skills = new Skills(this);
 		this.looks = new Looks(this);
 		this.interfaces = new Interfaces(this);
-		//this.inventory = new ItemContainer(world, 28, ItemContainer.Type.REGULAR);
+		this.inventory = new ItemContainer(world, 28, ItemContainer.Type.REGULAR);
 		this.equipment = new ItemContainer(world, 14, ItemContainer.Type.REGULAR);
-		// this.bank = new ItemContainer(world, 800,
-		// ItemContainer.Type.FULL_STACKING);
 		this.varps = new Varps(this);
-		// this.lastInputDialog = new InputDialog(this);
+		//this.lastInputDialog = new InputDialog(this);
 
 		prayer = new Prayer(this);
 		loadout = new Loadout();
@@ -340,7 +338,6 @@ public class Player extends Entity {
 		/////// sj
 		debug = false;
 		resetSpecialEnergy();
-		// bank = new Bank(this);
 		bank = new Bank(this);
 		combatUtil = new CombatUtil(this);
 		getVarps().setVarbit(Varbit.XP_DROPS_ORB, 1);

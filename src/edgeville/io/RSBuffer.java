@@ -80,6 +80,16 @@ public class RSBuffer {
 		backing.writeByte(v + 128);
 		return this;
 	}
+	
+	/**
+	 * Custom by simon
+	 * @param v
+	 * @return
+	 */
+	public RSBuffer writeByteC(int v) {
+		backing.writeByte(0 - v);
+		return this;
+	}
 
 	public RSBuffer writeByteS(int v) {
 		backing.writeByte(128 - v);

@@ -24,11 +24,12 @@ public class SetPlayerOption implements Command {
 
 		RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(1 + 1 + 1 + option.length() + 1 + 1));
 
-		buffer.packet(133).writeSize(RSBuffer.SizeType.BYTE);
+		buffer.packet(30).writeSize(RSBuffer.SizeType.BYTE);
 
-		buffer.writeByteS(top ? 1 : 0);
-		buffer.writeByteN(slot);
+		
+		buffer.writeByte(slot);
 		buffer.writeString(option);
+		buffer.writeByteA(top ? 1 : 0);
 
 		return buffer;
 	}

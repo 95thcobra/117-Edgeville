@@ -21,11 +21,12 @@ public class UpdateSkill implements Command {
 	@Override public RSBuffer encode(Player player) {
 		RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(7));
 
-		buffer.packet(167);
+		buffer.packet(56);
 
-		buffer.writeByteS(level);
-		buffer.writeIntV2(xp);
+
 		buffer.writeByteA(skill);
+		buffer.writeIntV2(xp);
+		buffer.writeByteC(level);
 
 		return buffer;
 	}

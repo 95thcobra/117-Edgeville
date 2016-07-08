@@ -102,29 +102,24 @@ public class LoginService implements Service {
 	}
 
 	public static void complete(Player player, GameServer server, LoginRequestMessage message) {
-		//player.interfaces().resizable(message.resizableInterfaces());
+		player.interfaces().resizable(message.resizableInterfaces());
 		player.move(player.getTile());
 
 		// Attach player to session
 		player.channel().attr(ServerHandler.ATTRIB_PLAYER).set(player);
 
-		
-		System.out.println("Sending displaymap!");
 		player.write(new DisplayMap(player)); // This has to be the first packet!		
 		
-		// incoming packet crash
-		//player.write(new SetRootPane(548));
-		
-		//player.world().syncMap(player, null);
+		player.world().syncMap(player, null);
 		player.interfaces().send(); // Must come after to set root pane; else crash =(
 
 		// This isn't really a packet but it's required to be done on the logic thread
-		/*player.pendingActions().add(new Action() {
+		player.pendingActions().add(new Action() {
 			public void decode(RSBuffer buf, ChannelHandlerContext ctx, int opcode, int size) {}
 			public void process(Player player) {
 				player.initiate();
 			}
-		});*/
+		});
 	}
 
 }
