@@ -18,9 +18,9 @@ import java.util.List;
 /**
  * @author Simon on 8/23/2014.
  */
-public class PlayerSyncTask implements Task {
+public class PlayerSyncTask2 implements Task {
 
-	private static final Logger logger = LogManager.getLogger(PlayerSyncTask.class);
+	private static final Logger logger = LogManager.getLogger(PlayerSyncTask2.class);
 
 	static class Job extends SubTask {
 
@@ -46,30 +46,55 @@ public class PlayerSyncTask implements Task {
 			buffer.packet(64).writeSize(RSBuffer.SizeType.SHORT);
 
 			buffer.startBitMode();
-			
-			//Movement
-			boolean needsUpdate = player.sync().dirty();
-			if (needsUpdate) {
-				// first one
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0); // No movement
-				
-				// second one
-				//buffer.writeBits(1, 0);
-				//buffer.writeBits(2, 0); // No movement
-			}
-			
-			// OTher players
-			for(int i = 0 ; i < 2048; i ++) { // first one
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0);
-			}
-			/*for(int i = 0 ; i < 5; i ++) { // second one
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0);
-			}*/
-			
+			encodeContextPlayer(player, buffer);
+			encodeSurroundings(player, buffer);
+			encodeMissing(player, buffer);
 			buffer.endBitMode();
+
+			// Update other masks
+			PlayerSyncInfo sync = (PlayerSyncInfo) player.sync();
+
+			for (int i = 0; i < sync.playerUpdateReqPtr(); i++) {
+				Player p = player.world().players().get(sync.playerUpdateRequests()[i]);
+
+				if (p == null) {
+					logger.warn("THIS SHOULD NOT HAPPEN!");
+					buffer.writeByte(0);
+					continue;
+				}
+
+				PlayerSyncInfo pSync = (PlayerSyncInfo) p.sync();
+				int mask = pSync.calculatedFlag()
+						| (sync.isNewlyAdded(p.index()) ? PlayerSyncInfo.Flag.LOOKS.value : 0);
+				if (mask >> 8 != 0) {
+					mask |= 0x80;
+				}
+
+				buffer.writeByte(mask);
+				if (mask >> 8 != 0)
+					buffer.writeByte(mask >> 8);
+
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.HIT.value))
+					buffer.get().writeBytes(pSync.hitSet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.FACE_ENTITY.value))
+					buffer.get().writeBytes(pSync.faceEntitySet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.GRAPHIC.value))
+					buffer.get().writeBytes(pSync.graphicSet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.SHOUT.value))
+					buffer.get().writeBytes(pSync.shoutSet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.LOOKS.value) || sync.isNewlyAdded(p.index()))// this
+					buffer.get().writeBytes(pSync.looksBlock());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.FORCE_MOVE.value))
+					buffer.get().writeBytes(pSync.forceMoveSet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.FACE_TILE.value))
+					buffer.get().writeBytes(pSync.faceTileSet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.CHAT.value))
+					buffer.get().writeBytes(pSync.chatMessageBlock());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.ANIMATION.value))
+					buffer.get().writeBytes(pSync.animationSet());
+				if (pSync.hasFlag(PlayerSyncInfo.Flag.HIT2.value))
+					buffer.get().writeBytes(pSync.hitSet2());
+			}
 
 			player.write(new UpdatePlayers(buffer));
 		}
