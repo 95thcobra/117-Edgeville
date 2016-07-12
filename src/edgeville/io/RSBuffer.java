@@ -80,9 +80,10 @@ public class RSBuffer {
 		backing.writeByte(v + 128);
 		return this;
 	}
-	
+
 	/**
 	 * Custom by simon
+	 * 
 	 * @param v
 	 * @return
 	 */
@@ -273,6 +274,14 @@ public class RSBuffer {
 
 	public int bitpos(int i) {
 		return 8 * i - bitPosition;
+	}
+
+	public void writeBytes(byte[] b) {
+		backing.writeBytes(b);
+	}
+	
+	public byte[] getBuffer() {
+		return backing.array();
 	}
 
 	public void writeBits(int numBits, int value) {

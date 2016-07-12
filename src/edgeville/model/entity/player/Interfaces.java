@@ -68,9 +68,9 @@ public class Interfaces {
 
 		// send(90, PANE_FIXED, 12, true); // bounty combat
 
-		send(50, PANE_FIXED, 27, false); // unidentified
+		//send(50, PANE_FIXED, 27, false); // unidentified
 
-		send(162, PANE_FIXED, 20, true); // chatbox
+		/*send(162, PANE_FIXED, 20, true); // chatbox
 		send(160, PANE_FIXED, 9, true); // orbs
 		send(122, PANE_FIXED, 15, true); // XP DROPPPPP BOX!!!!!!
 		send(378, PANE_FIXED, 28, false); // prelogin interface
@@ -90,9 +90,9 @@ public class Interfaces {
 		send(216, PANE_FIXED, 74, true); // emotes
 		send(239, PANE_FIXED, 75, true); // music
 		send(589, PANE_FIXED, 69, true); // clan chat
-		send(593, PANE_FIXED, 62, true); // attack styles
+		send(593, PANE_FIXED, 62, true); // attack styles*/
 
-		setInterfaceSettings();
+		//setInterfaceSettings();
 	}
 
 	public void enableXPDrops() {

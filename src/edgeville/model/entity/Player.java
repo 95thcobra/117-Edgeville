@@ -350,9 +350,9 @@ public class Player extends Entity {
 	}
 
 	public void giveStarterPack() {
-		spawnMelee();
-		presetBank();
-		message(TextUtil.colorString("Check the quest tab for spawns!", TextUtil.Colors.RED));
+		//spawnMelee();
+		//presetBank();
+		//message(TextUtil.colorString("Check the quest tab for spawns!", TextUtil.Colors.RED));
 		setReceivedStarter(true);
 	}
 

@@ -41,37 +41,108 @@ public class PlayerSyncTask implements Task {
 				sync(player);
 		}
 
+		private void skipPlayers(RSBuffer buffer, int amount) {
+			buffer.writeBits(2, amount == 0 ? 0 : amount > 255 ? 3 : (amount > 31 ? 2 : 1));
+			if (amount > 0)
+				buffer.writeBits(amount > 255 ? 11 : (amount > 31 ? 8 : 5), amount);
+		}
+
+		public static Player[] localPlayers = new Player[2048];
+		public static boolean[] skippedPlayers = new boolean[2048];
+
+		private void processLocalPlayers(Player player, RSBuffer buffer, boolean b) {
+			int skip = 0;
+
+			for (int i = 0; i < player.sync().localPlayerPtr(); i++) {
+				int playerIndex = player.sync().localPlayerIndices()[i];
+				Player currentPlayer = player.world().players().get(playerIndex);
+				
+				if (b ? currentPlayer.sync().calculatedFlag() == 0 : currentPlayer.sync().calculatedFlag() != 0) {
+					continue;
+				}
+				
+				
+
+				boolean needsUpdate = player.sync().dirty();
+				if (needsUpdate) {
+
+					buffer.writeBits(1, 1); // player needs update
+					buffer.writeBits(1, 1); // player needs flag update
+					buffer.writeBits(2, 0); // Type of update 0=remove
+					localPlayers[playerIndex] = null;
+
+				} else {
+
+					buffer.writeBits(1, 0); // player no needs updating
+					// buffer.writeBits(2, 1); // amount of players to skip
+					skipPlayers(buffer, 0); // amount of players to skip
+
+				}
+			}
+		}
+
+		private void processLocalPlayers2(Player player, RSBuffer buffer) {
+			for (int i = 0; i < player.sync().localPlayerPtr(); i++) {
+				int playerIndex = player.sync().localPlayerIndices()[i];
+
+				boolean needsUpdate = player.sync().dirty();
+				if (needsUpdate) {
+
+					buffer.writeBits(1, 1); // player needs update
+					buffer.writeBits(1, 1); // player needs flag update
+					buffer.writeBits(2, 0); // Type of update 0=remove
+
+				} else {
+
+					buffer.writeBits(1, 0); // player no needs updating
+					// buffer.writeBits(2, 1); // amount of players to skip
+					skipPlayers(buffer, 1); // amount of players to skip
+
+				}
+			}
+		}
+
 		private void sync(Player player) {
 			RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(512));
 			buffer.packet(64).writeSize(RSBuffer.SizeType.SHORT);
 
 			buffer.startBitMode();
+			processLocalPlayers(player, buffer, true);
+			processLocalPlayers(player, buffer, false);
 			
-			//Movement
-			boolean needsUpdate = player.sync().dirty();
-			if (needsUpdate) {
-				// first one
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0); // No movement
-				
-				// second one
-				//buffer.writeBits(1, 0);
-				//buffer.writeBits(2, 0); // No movement
-			}
-			
-			// OTher players
-			for(int i = 0 ; i < 2048; i ++) { // first one
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0);
-			}
-			/*for(int i = 0 ; i < 5; i ++) { // second one
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0);
-			}*/
+			processOutsidePlayers(player, buffer, true);
+			processOutsidePlayers(player, buffer, false);
 			
 			buffer.endBitMode();
 
 			player.write(new UpdatePlayers(buffer));
+		}
+
+		public static int[] outsidePlayerIndices = new int[2048];
+		public static int outsidePlayerIndexCount = 0;
+		
+		
+		private void processOutsidePlayers(Player player, RSBuffer buffer, boolean b) {
+			int skip = 0;
+			int localAddedPlayers = 0;
+			boolean needsAdd = false;
+			
+			for(int i = 0 ; i < outsidePlayerIndexCount; i++) {
+				int playerIndex = outsidePlayerIndices[i];
+				Player currentPlayer = player.world().players().get(playerIndex);
+				if (b ? currentPlayer.sync().calculatedFlag() == 0 : currentPlayer.sync().calculatedFlag() != 0) {
+					continue;
+				}
+				
+				if (needsAdd) {
+					buffer.writeBits(1, 1); // Player needs updating
+					buffer.writeBits(1, 1);
+					buffer.writeBits(6, currentPlayer.getTile().getXInRegion());
+					buffer.writeBits(6, currentPlayer.getTile().getYInRegion());
+				}
+				
+			}
+			
 		}
 
 		private void encodeContextPlayer(Player player, RSBuffer buffer) {

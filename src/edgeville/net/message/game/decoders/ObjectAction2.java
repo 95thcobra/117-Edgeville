@@ -56,11 +56,11 @@ public class ObjectAction2 implements Action {
 
             player.walkTo(obj, PathQueue.StepType.REGULAR);
             player.faceObj(obj);
-            Tile targetTile = player.pathQueue().getTargetTile();
+            //Tile targetTile = player.pathQueue().getTargetTile();
             player.world().getEventHandler().addEvent(player, new Event() {
                 @Override
                 public void execute(EventContainer container) {
-                    if (player.getTile().distance(targetTile) <= 3) {
+                    if (player.getTile().distance(obj.tile()) <= 1) {
                         new ObjectClick2Action().handleObjectClick(player, obj);
                         container.stop();
                     }

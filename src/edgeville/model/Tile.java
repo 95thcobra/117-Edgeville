@@ -68,8 +68,20 @@ public class Tile {
 		return level << 30 | (z & 0x7FFF) << 15 | x & 0x7FFF;
 	}
 	
+	public int MatrixgetTileHash() {
+		return z + (x << 14) + (level << 28);
+	}
+	
 	public int getRegionX() {
 		return (x >> 6);
+	}
+	
+	public int getXInRegion() {
+		return x & 0x3F;
+	}
+
+	public int getYInRegion() {
+		return z & 0x3F;
 	}
 
 	public int getRegionY() {

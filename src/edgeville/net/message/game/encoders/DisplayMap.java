@@ -52,8 +52,10 @@ public class DisplayMap implements Command { // Aka dipsleemap
 			return;
 		System.out.println("GPI initialized");
 		player.world().registerPlayer(player);
+		
 		buf.startBitMode();
-		buf.writeBits(30, player.getTile().toPacked());
+		//buf.writeBits(30, player.getTile().toPacked());
+		buf.writeBits(30, player.getTile().MatrixgetTileHash());
 		
 		for (int playerIndex = 1; playerIndex < 2048; playerIndex++) {
 			if (playerIndex != player.index()) {
