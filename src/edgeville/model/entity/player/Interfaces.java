@@ -63,11 +63,13 @@ public class Interfaces {
 
 	public void sendFixed() {
 		sendRoot(PANE_FIXED);
-
+		//send(162, PANE_FIXED, 20, true); // chatbox
+		
 		// Send the interfaces
 
-		// send(90, PANE_FIXED, 12, true); // bounty combat
-
+		 send(90, PANE_FIXED, 12, true); // bounty combat
+			send(122, PANE_FIXED, 15, true); // XP DROPPPPP BOX!!!!!!
+			send(216, PANE_FIXED, 74, true); // emotes
 		//send(50, PANE_FIXED, 27, false); // unidentified
 
 		/*send(162, PANE_FIXED, 20, true); // chatbox

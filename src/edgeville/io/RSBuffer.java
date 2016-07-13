@@ -281,9 +281,21 @@ public class RSBuffer {
 	}
 	
 	public byte[] getBuffer() {
+		//System.out.println("godadmn dude: " + backing.writerIndex());
 		return backing.array();
 	}
+	
+	
+	public byte[] getRemainingBytes() {
+		byte[] bytes = new byte[backing.readableBytes()];
+		backing.readBytes(bytes);
+		return bytes;
+	}
 
+	public int getWriterIndex() {
+		return backing.writerIndex();
+	}
+	
 	public void writeBits(int numBits, int value) {
 		int bytePos = bitPosition >> 3;
 		int bitOffset = 8 - (bitPosition & 7);
