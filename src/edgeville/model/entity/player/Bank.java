@@ -383,21 +383,24 @@ public class Bank {
 	}
 
 	public void moveItemsToInventory(int id, int amount) {
-		int unnotedId = new Item(id).definition(player.world()).unnotedID;
-
+		Item item = new Item(id);
+		int unnotedId = item.definition(player.world()).unnotedID;
+		
 		int idToAdd;
 		if (player.getVarps().getVarbit(Varbit.BANK_WITHDRAW_NOTE) == 1 && unnotedId > 0 && unnotedId > id) {
 			idToAdd = unnotedId;
 		} else {
 			idToAdd = id;
 		}
-		if (!this.contains(id, amount)) {
+		if (!contains(id, amount)) {
 			return;
 		}
 
-		if (player.getInventory().add(idToAdd, amount).success()) {
-			remove(id, amount);
-		}
+		int amountAdded = player.getInventory().addAndReturnAmount(idToAdd, amount);
+		//if (player.getInventory().add(idToAdd, amount).success()) {
+			//remove(id, amount);
+		//}
+		remove(id, amountAdded);
 		makeDirty();
 	}
 

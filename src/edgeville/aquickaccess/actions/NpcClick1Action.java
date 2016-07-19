@@ -9,6 +9,8 @@ import edgeville.model.entity.Player;
 public class NpcClick1Action {
     public void handleNpcClick(Player player, int npcId) {
         switch (npcId) {
+        
+        // teleport wizard
             case 4400:
                 new DialogueHandler().sendOptionDialogue(
                         player,
@@ -18,6 +20,13 @@ public class NpcClick1Action {
                         "Falador",
                         "Nowhere");
                 player.setDialogueAction(1);
+                break;
+                
+                // Healer nurse
+            case 3343:
+            	player.resetSpecialEnergy();
+            	player.skills().resetStats();
+            	player.message("Your stats have been reset and special energy has been restored!");
                 break;
         }
     }

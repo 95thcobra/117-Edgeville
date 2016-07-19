@@ -48,39 +48,147 @@ public class PlayerSyncTask implements Task {
 
 		public static int testlol = 0; // TEST THIS FOR ONCE
 
+		private List<Integer> localPlayerIndexesToSkip = new ArrayList<>();
+		// private int[] outsidePlayerIndexesToSkip = new int[2048];
+
 		private void sync(Player player) {
-			if (testlol == 0) {
+			if (!player.initialized) {
+				return;
+			}
+			
+			
+			if (testlol == 0) {			
+			
+				testlol++;
+				
+				System.out.println("SYNBC");
+				
 				RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(512));
-				//RSBuffer buffer = new RSBuffer(Unpooled.buffer());
+				RSBuffer appearanceBuffer = new RSBuffer(Unpooled.buffer());
+
+				// RSBuffer buffer = new RSBuffer(Unpooled.buffer());
 				buffer.packet(64).writeSize(RSBuffer.SizeType.SHORT);
 				buffer.startBitMode();
 
-				buffer.writeBits(1, 1);
-				buffer.writeBits(1, 1);
-				buffer.writeBits(2, 0);
-
-				// outside loop 2
-				for (int i = 0; i < 2047; i++) {
-					buffer.writeBits(1, 0);
-					buffer.writeBits(2, 0); // Skip amount 0
-				}
+				// Local players
+				processLocalPlayers(player, buffer, appearanceBuffer, true);
+				processLocalPlayers(player, buffer, appearanceBuffer, false); // deze
+																				// mag
+																				// niet
+				
+				// Outside players
+				processOutsidePlayers(player, buffer, appearanceBuffer, true);
+				processOutsidePlayers(player, buffer, appearanceBuffer, false);
+				// processOutsidePlayers(player, buffer, appearanceBuffer,
+				// false); // deze mag niet
 
 				buffer.endBitMode();
 
-				int maskData = 32;
+				// Mask
+				int maskData = 32; // Mask
 				buffer.writeByte(maskData);
 
-				RSBuffer appearanceBuffer = new RSBuffer(Unpooled.buffer());
-				updateAppearance(player, appearanceBuffer);	
+				// Appearance
+				//updateAppearance(player, appearanceBuffer);
 
 				buffer.writeByte(appearanceBuffer.getWriterIndex()); // size
-				buffer.writeBytes(appearanceBuffer.getRemainingBytes()); // doesnt work, bit position is too high afterwards.
-				//updateAppearance(player, buffer); // works
+				buffer.writeBytes(appearanceBuffer.getRemainingBytes()); // doesnt
+																			// work,
+																			// bit
+																			// position
+																			// is
+																			// too
+																			// high
+																			// afterwards.
+				
+				
+				
+				player.sync().localPlayerIndexCount = 0;
+				player.sync().outsidePlayerIndexCount =  0;
+				
+				
+				for (int playerIndex = 1; playerIndex < 2048; playerIndex++) {
+					slotFlags[playerIndex] >>= 1;
 
-				System.out.println("sending 64 playerupdating");
+				Player pl = player.sync().localPlayers[playerIndex];
+					if (pl == null) {
+						player.sync().outsidePlayerIndexes[player.sync().outsidePlayerIndexCount++] = playerIndex;
+					} else {
+						player.sync().localPlayerIndexes[player.sync().localPlayerIndexCount++] = playerIndex;
+					}	
+				}
+				
+				
+				
+				// updateAppearance(player, buffer); // works
+
 				player.write(new UpdatePlayers(buffer));
 			}
-			testlol++;
+		}
+
+		private boolean skipLocal = false;
+		private boolean needUpdate = true;
+		private void processLocalPlayers(Player player, RSBuffer buffer, RSBuffer appearanceUpdateBuffer, boolean b) {
+			int skip = 0;
+
+			for(int i = 0 ; i < player.sync().localPlayerIndexCount; i++) {
+				int playerIndex = player.sync().localPlayerIndexes[i];
+				
+				// Slot flag continue.
+				if (b ? (0x1 & slotFlags[playerIndex]) != 0 : (0x1 & slotFlags[playerIndex]) == 0) {
+					continue;
+				}
+			
+				Player p = player.sync().localPlayers[playerIndex];
+			
+				// This only happens once. 
+				if (needUpdate) {
+					updateAppearance(p, appearanceUpdateBuffer);
+					
+					buffer.writeBits(1, 1); // needs update
+					buffer.writeBits(1, 1);
+					buffer.writeBits(2, 0);
+					
+					System.out.println("Update done");
+					
+					needUpdate = false;
+				} else {
+					buffer.writeBits(1, 0);
+					
+					for(int index2 = i + 1; index2 < player.sync().localPlayerIndexCount; index2++) {
+						skip++;
+					}
+					
+					skipPlayers(buffer, skip);
+					slotFlags[playerIndex] = (byte)(slotFlags[playerIndex] | 2);
+				}
+			}
+		}
+
+		private List<Integer> outsidePlayerIndexesToSkip = new ArrayList<>();
+		private boolean skipOutsidePlayers = true;
+
+		private void processOutsidePlayers(Player player, RSBuffer buffer, RSBuffer appearanceUpdateBuffer, boolean b) {
+			if (skipOutsidePlayers) {
+				skipOutsidePlayers = false;
+				return;
+			}
+
+			for (int i = 0; i < 2047; i++) {
+
+				// int playerIndex = player.sync().outsidePlayerIndices[i];
+
+				// if (!outsidePlayerIndexesToSkip.contains(playerIndex)) {
+				// continue;
+				// }
+
+				buffer.writeBits(1, 0);
+				buffer.writeBits(2, 0); // Skip amount 0
+
+				// outsidePlayerIndexesToSkip.add(playerIndex);
+			}
+
+			skipOutsidePlayers = true;
 		}
 
 		private boolean needsRemove(Player player, Player currentPlayer) {
@@ -95,178 +203,10 @@ public class PlayerSyncTask implements Task {
 					&& player.getTile().level == currentPlayer.getTile().level && localAddedPlayers < MAX_PLAYER_ADD;
 		}
 
-		public Player[] localPlayers = new Player[2048];
-		public Player[] outsidePlayers = new Player[2048];
-
-		public int[] localPlayerIndices = new int[2048];
-		public int localPlayerIndexCount = 0;
-
-		public int[] outsidePlayerIndices = new int[2048];
-		public int outsidePlayerIndexCount = 0;
-
-		public int[] regionHashes = new int[2048];
+		// public int[] player.sync().regionHashes = new int[2048];
 		public byte[] slotFlags = new byte[2048];
 
 		public int localAddedPlayers = 0;
-
-		private void processOutsidePlayers(Player player, RSBuffer buffer, RSBuffer appearanceUpdateBuffer, boolean b) {
-			int skip = 0;
-			for (int i = 0; i < outsidePlayerIndexCount; i++) {
-				int playerIndex = outsidePlayerIndices[i];
-				if (b ? slotFlags[playerIndex] == 0 : slotFlags[playerIndex] != 0)
-					continue;
-
-				Player currentPlayer = player.world().players().get(playerIndex);
-				if (needsAdd(player, currentPlayer)) {
-					buffer.writeBits(1, 1);
-					buffer.writeBits(2, 0); // request add
-					int hash = currentPlayer.getTile().toRegionPacked();
-					if (hash == regionHashes[playerIndex])
-						buffer.writeBits(1, 0);
-					else {
-						buffer.writeBits(1, 1);
-						updateRegionHash(buffer, regionHashes[playerIndex], hash);
-						regionHashes[playerIndex] = hash;
-					}
-					buffer.writeBits(6, currentPlayer.getTile().getXInRegion());
-					buffer.writeBits(6, currentPlayer.getTile().getYInRegion());
-					boolean NEEDAPPEARANCEUPDATE_TODO = false;// TODO
-					appendUpdateBlock(currentPlayer, appearanceUpdateBuffer, NEEDAPPEARANCEUPDATE_TODO, true);
-					buffer.writeBits(1, 1);
-					localAddedPlayers++;
-					localPlayers[currentPlayer.index()] = currentPlayer;
-					slotFlags[playerIndex] = (byte) (slotFlags[playerIndex] | 2);
-				} else {
-					int hash = currentPlayer == null ? regionHashes[playerIndex]
-							: currentPlayer.getTile().toRegionPacked();
-					if (currentPlayer != null && hash != regionHashes[playerIndex]) {
-						buffer.writeBits(1, 1);
-						updateRegionHash(buffer, regionHashes[playerIndex], hash);
-						regionHashes[playerIndex] = hash;
-					} else {
-						buffer.writeBits(1, 0);
-						for (int j = i + 1; j < outsidePlayerIndexCount; j++) {
-							int p2Index = outsidePlayerIndices[j];
-							if (b ? slotFlags[p2Index] == 0 : slotFlags[p2Index] != 0)
-								continue;
-
-							Player p2 = player.world().players().get(p2Index);
-							if (needsAdd(player, p2)
-									|| (p2 != null && p2.getTile().toRegionPacked() != regionHashes[p2Index]))
-								break;
-							skip++;
-
-						}
-						skipPlayers(buffer, skip);
-					}
-				}
-			}
-		}
-
-		private void processLocalPlayers(Player player, RSBuffer buffer, RSBuffer appearanceUpdateBuffer, boolean b) {
-			int skip = 0;
-			for (int i = 0; i < this.localPlayerIndexCount; i++) {
-				int playerIndex = this.localPlayerIndices[i];
-				Player currentPlayer = player.world().players().get(playerIndex);
-
-				if (b ? slotFlags[playerIndex] != 0 : slotFlags[playerIndex] == 0)
-					continue;
-
-				if (needsRemove(player, currentPlayer)) {
-					buffer.writeBits(1, 1); // needs update
-					buffer.writeBits(1, 0); // no masks update
-					buffer.writeBits(2, 0); // request remove
-
-					regionHashes[playerIndex] = currentPlayer.activeMap() == null
-							? currentPlayer.getTile().toRegionPacked() : currentPlayer.activeMap().toRegionPacked();
-					int hash = currentPlayer.getTile().toRegionPacked();
-					if (hash == regionHashes[playerIndex])
-						buffer.writeBits(1, 0);
-					else {
-						buffer.writeBits(1, 1);
-						updateRegionHash(buffer, regionHashes[playerIndex], hash);
-						regionHashes[playerIndex] = hash;
-					}
-
-					localPlayers[playerIndex] = null;
-				} else {
-					boolean needsUpdate = currentPlayer.sync().dirty();
-
-					if (needsUpdate) {
-						boolean NEEDAPPEARANCEUPDATE_TODO = false;// TODO
-						appendUpdateBlock(currentPlayer, appearanceUpdateBuffer, NEEDAPPEARANCEUPDATE_TODO, false);
-					}
-
-					if (currentPlayer.sync().teleported()) {
-						buffer.writeBits(1, 1); // needs update
-						buffer.writeBits(1, needsUpdate ? 1 : 0); // flag update
-						buffer.writeBits(2, 3); // teleport type
-
-						int xOffset = currentPlayer.getTile().x - currentPlayer.activeMap().x;
-						int yOffset = currentPlayer.getTile().z - currentPlayer.activeMap().z;
-						int heightOffset = currentPlayer.getTile().level - currentPlayer.activeMap().level;
-
-						if (Math.abs(xOffset) <= 14 && Math.abs(yOffset) <= 14) {
-							buffer.writeBits(1, 0);
-
-							if (xOffset < 0)
-								xOffset += 32;
-							if (yOffset < 0)
-								yOffset += 32;
-
-							buffer.writeBits(12, yOffset + (xOffset << 5) + (heightOffset << 10));
-
-						} else {
-							buffer.writeBits(1, 1);
-							buffer.writeBits(30,
-									(yOffset & 0x3fff) + ((xOffset & 0x3fff) << 14) + ((heightOffset & 0x3) << 28));
-						}
-					} else if (currentPlayer.sync().primaryStep() >= 0) { // walking?
-						boolean running = currentPlayer.sync().primaryStep() >= 0;
-						buffer.writeBits(1, 1);
-
-						int xOffset = currentPlayer.getTile().x - currentPlayer.activeMap().x;
-						int yOffset = currentPlayer.getTile().z - currentPlayer.activeMap().z;
-						int heightOffset = currentPlayer.getTile().level - currentPlayer.activeMap().level;
-
-						if (xOffset == 0 && yOffset == 0) {
-							buffer.writeBits(1, 1);
-							buffer.writeBits(2, 0);
-							if (!needsUpdate) {
-								boolean NEEDAPPEARANCEUPDATE_TODO = false;// TODO
-								appendUpdateBlock(currentPlayer, appearanceUpdateBuffer, NEEDAPPEARANCEUPDATE_TODO,
-										false);
-							}
-						} else {
-							buffer.writeBits(1, needsUpdate ? 1 : 0);
-							buffer.writeBits(2, running ? 2 : 1);
-							int WALKING_DIRECTION_TODO = 0;
-							buffer.writeBits(running ? 4 : 3, WALKING_DIRECTION_TODO); // TODO
-						}
-					} else if (needsUpdate) {
-						buffer.writeBits(1, 1);
-						buffer.writeBits(1, 1);
-						buffer.writeBits(2, 0);
-					} else { // skip
-						buffer.writeBits(1, 0);
-
-						for (int j = i + 1; j < currentPlayer.sync().localPlayerPtr(); j++) {
-							int player2Index = currentPlayer.sync().localPlayerIndices()[j];
-							if (b ? currentPlayer.sync().calculatedFlag() != 0
-									: currentPlayer.sync().calculatedFlag() == 0)
-								continue;
-							Player p2 = localPlayers[player2Index];
-							if (needsRemove(player, p2)) {
-								break;
-							}
-							skip++;
-						}
-						this.skipPlayers(buffer, skip);
-						slotFlags[playerIndex] = (byte) (slotFlags[playerIndex] | 2);
-					}
-				}
-			}
-		}
 
 		private void updateRegionHash(RSBuffer buffer, int lastRegionHash, int currentRegionHash) {
 			int lastRegionX = lastRegionHash >> 8;
@@ -310,7 +250,7 @@ public class PlayerSyncTask implements Task {
 		}
 
 		private void updateAppearance(Player player, RSBuffer appearanceBuffer) {
-			
+
 			appearanceBuffer.writeByte(0); // Gender
 			appearanceBuffer.writeByte(2); // Skull
 			appearanceBuffer.writeByte(player.getPrayerHeadIcon()); // Prayer
@@ -347,8 +287,8 @@ public class PlayerSyncTask implements Task {
 					 * (looks[i] != 0) { buffer.writeShort(0x100 + looks[i]); }
 					 * else { buffer.writeByte(0); }
 					 */
-					//appearanceBuffer.writeByte(0);
-					//appearanceBuffer.writeByte(looks[i]);
+					// appearanceBuffer.writeByte(0);
+					// appearanceBuffer.writeByte(looks[i]);
 					appearanceBuffer.writeShort(0x100 + looks[i]);
 				}
 			}
@@ -360,12 +300,14 @@ public class PlayerSyncTask implements Task {
 			appearanceBuffer.writeByte(0);
 			appearanceBuffer.writeByte(0);
 
-			//int weapon = player.getEquipment().hasAt(EquipSlot.WEAPON) ? player.getEquipment().get(EquipSlot.WEAPON).getId() : -1;
-			//int[] renderpair = player.world().equipmentInfo().renderPair(weapon);
-			
-			//for (int renderAnim : renderpair) {
-			//	buffer.writeShort(renderAnim); // Renderanim
-			//}
+			// int weapon = player.getEquipment().hasAt(EquipSlot.WEAPON) ?
+			// player.getEquipment().get(EquipSlot.WEAPON).getId() : -1;
+			// int[] renderpair =
+			// player.world().equipmentInfo().renderPair(weapon);
+
+			// for (int renderAnim : renderpair) {
+			// buffer.writeShort(renderAnim); // Renderanim
+			// }
 			appearanceBuffer.writeShort(-1); // Renderanim
 			appearanceBuffer.writeShort(-1); // Renderanim
 			appearanceBuffer.writeShort(-1); // Renderanim
@@ -377,7 +319,7 @@ public class PlayerSyncTask implements Task {
 			/* Str idgaf */
 
 			appearanceBuffer.writeString(player.name());
-			
+
 			appearanceBuffer.writeByte(0);
 			appearanceBuffer.writeShort(0);
 			appearanceBuffer.writeByte(0);

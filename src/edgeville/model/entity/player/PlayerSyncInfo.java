@@ -18,8 +18,51 @@ public class PlayerSyncInfo extends SyncInfo {
 	private byte[] looksBlock;
 	private byte[] publicChatBlock;
 
+	
+	// NEW 
+	public Player[] localPlayers = new Player[2048];
+	public Player[] outsidePlayers = new Player[2048];
+
+	public int[] localPlayerIndexes = new int[2048];
+	public int localPlayerIndexCount = 0;
+
+	public int[] outsidePlayerIndexes = new int[2048];
+	public int outsidePlayerIndexCount = 0;
+	
+	public int[] regionHashes = new int[2048];
+	
+	public void init(RSBuffer buf, Player player) {
+		player.world().registerPlayer(player);
+		
+		buf.startBitMode();
+		buf.writeBits(30, player.getTile().MatrixgetTileHash());
+		
+		localPlayers[player.index()] = player;
+		localPlayerIndexes[localPlayerIndexCount++] = player.index();
+		
+		for (int playerIndex = 1; playerIndex < 2048; playerIndex++) {
+			if (playerIndex == player.index()) {
+				continue;
+			}
+				//buf.writeBits(18, player.getTile().toRegionPacked()); // this was good
+			
+			int regionHash = (player == null ? 0 : player.getTile().toRegionPacked());
+			regionHashes[playerIndex] = regionHash;
+			buf.writeBits(18, regionHash);
+			outsidePlayerIndexes[outsidePlayerIndexCount++] = playerIndex;
+		}
+		buf.endBitMode();
+		player.initialized = true;
+		System.out.println("GPI initialized");
+	}
+	// END NEW
+	
+	
+	
+	
+	
 	/* Related to player updating below */
-	private int[] localPlayerIndices = new int[255];
+	//private int[] localPlayerIndices = new int[255];
 	private int localPlayerPtr;
 	private int[] removedPlayerIndices = new int[255];
 	private int[] playerUpdateRequests = new int[255];
@@ -39,7 +82,7 @@ public class PlayerSyncInfo extends SyncInfo {
 	}
 
 	public int[] localPlayerIndices() {
-		return localPlayerIndices;
+		return localPlayerIndexes;
 	}
 
 	public int[] localNpcIndices() {
@@ -236,7 +279,7 @@ public class PlayerSyncInfo extends SyncInfo {
 
 	public boolean hasInView(int index) {
 		for (int i=0; i<localPlayerPtr; i++)
-			if (localPlayerIndices[i] == index)
+			if (localPlayerIndexes[i] == index)
 				return true;
 		return false;
 	}

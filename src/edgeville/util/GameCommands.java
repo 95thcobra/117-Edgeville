@@ -46,6 +46,12 @@ public final class GameCommands {
 	private static Map<String, Command> setup() {
 		commands = new HashMap<>();
 
+		
+		put(Privilege.PLAYER, "master", (p, args) -> {
+			p.setMaster();
+		});
+		
+		
 		put(Privilege.ADMIN, "obj", (p, args) -> {
 			Tile tile = p.getTile();
 			for (int i = 0; i < 21; i++) {
@@ -647,10 +653,6 @@ public final class GameCommands {
 			int id = p.world().server().store().getIndex(6).getContainerByName(name).getId();
 			p.message("%s resolves to %d.", name, id);
 			p.write(new PlayMusic(id));
-		});
-
-		put(Privilege.PLAYER, "master", (p, args) -> {
-			p.setMaster();
 		});
 
 		put(Privilege.ADMIN, "teleregion", (p, args) -> {

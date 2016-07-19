@@ -103,6 +103,56 @@ public class ItemContainer {
 	public Result add(Item item) {
 		return add(item, true);
 	}
+	
+	public int addAndReturnAmount(int id, int amt) {
+		return addAndReturnAmount(new Item(id, amt));
+	}
+	
+	// Adds as many possible items to inventory and returns how many were added.
+	public int addAndReturnAmount(Item item) {
+		if (item == null || item.getAmount() < 0)
+			return 0;
+
+		ItemDefinition def = item.definition(world);
+		boolean stackable = !item.hasProperties() && (def.stackable() || type == Type.FULL_STACKING);
+		int amt = count(item.getId());
+
+		// And complete the actual operation =)
+		if (stackable) {
+			int index = findFirst(item.getId()).first();
+
+			if (index == -1) {
+				if (nextFreeSlot() == -1)
+					return 0;;
+
+				items[nextFreeSlot()] = new Item(item.getId(), item.getAmount());
+				makeDirty();
+				return item.getAmount();
+			} else {
+				long cur = amt;
+				long target = cur + item.getAmount();
+				int add = (int) (target > Integer.MAX_VALUE ? Integer.MAX_VALUE - cur : item.getAmount());
+
+				items[index] = new Item(item.getId(), amt + add);
+				makeDirty();
+				return add;
+			}
+		} else {
+			int left = item.getAmount();
+			for (int i = 0; i < size(); i++) {
+				if (items[i] == null) {
+					items[i] = new Item(item, 1);
+
+					if (--left == 0) {
+						break;
+					}
+				}
+			}
+
+			makeDirty();
+			return item.getAmount() - left;
+		}
+	}
 
 	public Result add(Item item, boolean force) {
 		if (item == null || item.getAmount() < 0)

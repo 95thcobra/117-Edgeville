@@ -20,6 +20,10 @@ public class ObjectClick1Action {
 
 		// Prayer altar edgeville
 		case 6817:
+        	if (player.inCombat()) {
+        		player.message("You cannot do this in combat!");
+        		return;
+        	}
 			player.skills().restorePrayer();
 			player.animate(645);
 			player.message("You have recharged your prayer.");

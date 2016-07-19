@@ -58,7 +58,6 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 		super.channelUnregistered(ctx);
-
 		logger.trace("A client has disconnected: {}", ctx.channel());
 
 		if (ctx.channel().attr(ATTRIB_PLAYER).get() != null) {

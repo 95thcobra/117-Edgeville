@@ -38,7 +38,7 @@ public class ClanChat {
 	}
 
 	public void message(Player sender, String message) {
-		int icon;
+		/*int icon;
 		if (sender.getPrivilege() == Privilege.MODERATOR) {
 			icon = 1;
 		} else if (sender.getPrivilege() == Privilege.ADMIN) {
@@ -47,6 +47,7 @@ public class ClanChat {
 			icon = 0;
 		}
 		players.forEach(p -> p.write(new AddClanChatMessage(StringUtils.capitalize(sender.getUsername()), "Help", icon, 301, message)));
+		*/
 	}
 
 	public void save() {

@@ -47,33 +47,15 @@ public class DisplayMap implements Command { // Aka dipsleemap
 		}
 	}
 
-	private void initGPI(RSBuffer buf, Player player) {
-		if (player.initialized)
-			return;
-		System.out.println("GPI initialized");
-		player.world().registerPlayer(player);
-		
-		buf.startBitMode();
-		//buf.writeBits(30, player.getTile().toPacked());
-		buf.writeBits(30, player.getTile().MatrixgetTileHash());
-		
-		for (int playerIndex = 1; playerIndex < 2048; playerIndex++) {
-			if (playerIndex != player.index()) {
-				buf.writeBits(18, player.getTile().toRegionPacked());
-			}
-		}
-		
-		buf.endBitMode();
-		player.initialized = true;
-	}
-
 	@Override
 	public RSBuffer encode(Player player) {
 		RSBuffer buf = new RSBuffer(player.channel().alloc().buffer(12 + 4 * 4 * 9));
 		buf.packet(42).writeSize(RSBuffer.SizeType.SHORT);
 
-		initGPI(buf, player);
-
+		if (!player.initialized) {
+			player.sync().init(buf, player);
+		}
+		
 		System.out.println("sending x: " + x);
 		buf.writeLEShortA(x); // region x
 		System.out.println("sending z: " + z);
@@ -93,8 +75,7 @@ public class DisplayMap implements Command { // Aka dipsleemap
 			for (int yCalc = (z - 6) / 8; yCalc <= ((z + 6) / 8); yCalc++) {
 				int region = (xCalc << 8) + yCalc;
 				System.out.println("region xteas:" + region);
-				
-				
+
 				int[] xtea = MapDecryptionKeys.get(region);
 				if (forceSend || ((yCalc != 49) && (yCalc != 149) && (yCalc != 147) && (xCalc != 50)
 						&& ((xCalc != 49) || (yCalc != 47)))) {
