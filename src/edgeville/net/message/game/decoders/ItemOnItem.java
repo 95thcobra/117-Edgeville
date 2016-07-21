@@ -11,7 +11,7 @@ import edgeville.net.message.game.encoders.Action;
 import edgeville.net.message.game.encoders.PacketInfo;
 
 /**
- * @author William Talleur <talleurw@gmail.com>
+ * @author Simon
  * @date November 01, 2015
  */
 @PacketInfo(size = 16)

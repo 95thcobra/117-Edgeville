@@ -55,112 +55,88 @@ public class PlayerSyncTask implements Task {
 			if (!player.initialized) {
 				return;
 			}
-			
-			
-			if (testlol == 0) {			
-			
-				testlol++;
-				
-				System.out.println("SYNBC");
-				
-				RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(512));
-				RSBuffer appearanceBuffer = new RSBuffer(Unpooled.buffer());
 
-				// RSBuffer buffer = new RSBuffer(Unpooled.buffer());
-				buffer.packet(64).writeSize(RSBuffer.SizeType.SHORT);
-				buffer.startBitMode();
+			// if (testlol == 0) {
+			// testlol++;
+			RSBuffer buffer = new RSBuffer(player.channel().alloc().buffer(512));
+			RSBuffer appearanceBuffer = new RSBuffer(Unpooled.buffer());
 
-				// Local players
-				processLocalPlayers(player, buffer, appearanceBuffer, true);
-				processLocalPlayers(player, buffer, appearanceBuffer, false); // deze
-																				// mag
-																				// niet
-				
-				// Outside players
-				processOutsidePlayers(player, buffer, appearanceBuffer, true);
-				processOutsidePlayers(player, buffer, appearanceBuffer, false);
-				// processOutsidePlayers(player, buffer, appearanceBuffer,
-				// false); // deze mag niet
+			// RSBuffer buffer = new RSBuffer(Unpooled.buffer());
+			buffer.packet(64).writeSize(RSBuffer.SizeType.SHORT);
+			buffer.startBitMode();
 
-				buffer.endBitMode();
+			// Local players
+			processLocalPlayers(player, buffer, appearanceBuffer, true);
+			processLocalPlayers(player, buffer, appearanceBuffer, false);
 
-				// Mask
-				int maskData = 32; // Mask
-				buffer.writeByte(maskData);
+			// Outside players
+			processOutsidePlayers(player, buffer, appearanceBuffer, true);
+			processOutsidePlayers(player, buffer, appearanceBuffer, false);
 
-				// Appearance
-				//updateAppearance(player, appearanceBuffer);
+			buffer.endBitMode();
 
-				buffer.writeByte(appearanceBuffer.getWriterIndex()); // size
-				buffer.writeBytes(appearanceBuffer.getRemainingBytes()); // doesnt
-																			// work,
-																			// bit
-																			// position
-																			// is
-																			// too
-																			// high
-																			// afterwards.
-				
-				
-				
-				player.sync().localPlayerIndexCount = 0;
-				player.sync().outsidePlayerIndexCount =  0;
-				
-				
-				for (int playerIndex = 1; playerIndex < 2048; playerIndex++) {
-					slotFlags[playerIndex] >>= 1;
+			// Mask
+			int maskData = 32; // Mask
+			buffer.writeByte(maskData);
+
+			buffer.writeByte(appearanceBuffer.getWriterIndex()); // size
+			buffer.writeBytes(appearanceBuffer.getRemainingBytes());
+
+			player.sync().localPlayerIndexCount = 0;
+			player.sync().outsidePlayerIndexCount = 0;
+
+			for (int playerIndex = 1; playerIndex < 2048; playerIndex++) {
+				slotFlags[playerIndex] >>= 1;
 
 				Player pl = player.sync().localPlayers[playerIndex];
-					if (pl == null) {
-						player.sync().outsidePlayerIndexes[player.sync().outsidePlayerIndexCount++] = playerIndex;
-					} else {
-						player.sync().localPlayerIndexes[player.sync().localPlayerIndexCount++] = playerIndex;
-					}	
-				}
-				
-				
-				
-				// updateAppearance(player, buffer); // works
 
-				player.write(new UpdatePlayers(buffer));
+				if (pl == null) {
+					player.sync().outsidePlayerIndexes[player.sync().outsidePlayerIndexCount++] = playerIndex;
+				} else {
+					player.sync().localPlayerIndexes[player.sync().localPlayerIndexCount++] = playerIndex;
+				}
 			}
+
+			player.write(new UpdatePlayers(buffer));
+			// }
 		}
 
 		private boolean skipLocal = false;
 		private boolean needUpdate = true;
+
 		private void processLocalPlayers(Player player, RSBuffer buffer, RSBuffer appearanceUpdateBuffer, boolean b) {
 			int skip = 0;
 
-			for(int i = 0 ; i < player.sync().localPlayerIndexCount; i++) {
+			for (int i = 0; i < player.sync().localPlayerIndexCount; i++) {
 				int playerIndex = player.sync().localPlayerIndexes[i];
-				
+
 				// Slot flag continue.
 				if (b ? (0x1 & slotFlags[playerIndex]) != 0 : (0x1 & slotFlags[playerIndex]) == 0) {
 					continue;
 				}
-			
+
 				Player p = player.sync().localPlayers[playerIndex];
-			
-				// This only happens once. 
+
+				// This only happens once.
 				if (needUpdate) {
 					updateAppearance(p, appearanceUpdateBuffer);
-					
+
 					buffer.writeBits(1, 1); // needs update
 					buffer.writeBits(1, 1);
 					buffer.writeBits(2, 0);
-					
+
 					System.out.println("Update done");
-					
+
 					needUpdate = false;
 				} else {
 					buffer.writeBits(1, 0);
-					
-					for(int index2 = i + 1; index2 < player.sync().localPlayerIndexCount; index2++) {
+
+					for (int index2 = i + 1; index2 < player.sync().localPlayerIndexCount; index2++) {
 						skip++;
 					}
-					
+
 					skipPlayers(buffer, skip);
-					slotFlags[playerIndex] = (byte)(slotFlags[playerIndex] | 2);
+					slotFlags[playerIndex] = (byte) (slotFlags[playerIndex] | 2);
 				}
 			}
 		}
@@ -169,26 +145,30 @@ public class PlayerSyncTask implements Task {
 		private boolean skipOutsidePlayers = true;
 
 		private void processOutsidePlayers(Player player, RSBuffer buffer, RSBuffer appearanceUpdateBuffer, boolean b) {
-			if (skipOutsidePlayers) {
-				skipOutsidePlayers = false;
-				return;
+			int skip = 0;
+
+			for (int i = 0; i < player.sync().outsidePlayerIndexCount; i++) {
+				int playerIndex = player.sync().outsidePlayerIndexes[i];
+
+				if (b ? (0x1 & slotFlags[playerIndex]) == 0 : (0x1 & slotFlags[playerIndex]) != 0) {
+					System.out.println(i + "nsn");
+					continue;
+				}
+
+				if (skip > 0) {
+					skip--;
+					slotFlags[playerIndex] = (byte) (slotFlags[playerIndex] | 2);
+					System.out.println(i + "skip>0lol");
+					continue;
+				}
+
+				buffer.writeBits(1, 0); // no update needed
+				for (int i2 = i + 1; i2 < player.sync().outsidePlayerIndexCount; i2++) {
+					skip++;
+				}
+				skipPlayers(buffer, skip);
+				slotFlags[playerIndex] = (byte) (slotFlags[playerIndex] | 2);
 			}
-
-			for (int i = 0; i < 2047; i++) {
-
-				// int playerIndex = player.sync().outsidePlayerIndices[i];
-
-				// if (!outsidePlayerIndexesToSkip.contains(playerIndex)) {
-				// continue;
-				// }
-
-				buffer.writeBits(1, 0);
-				buffer.writeBits(2, 0); // Skip amount 0
-
-				// outsidePlayerIndexesToSkip.add(playerIndex);
-			}
-
-			skipOutsidePlayers = true;
 		}
 
 		private boolean needsRemove(Player player, Player currentPlayer) {
